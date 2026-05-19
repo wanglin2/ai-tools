@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+  <title>图片尺寸调整工具 | 思绪思维导图</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f5f7fa 0%, #e9edf5 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      margin: 0;
+    }
+
+    .card {
+      max-width: 720px;
+      width: 100%;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 4px 18px rgba(0, 20, 40, 0.08);
+      border-radius: 2.5rem;
+      padding: 2.2rem 2rem;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+      color: #5b6e8c;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid #3b82f6;
+      padding-left: 1rem;
+      font-weight: 400;
+      background: linear-gradient(to right, transparent, rgba(59,130,246,0.04));
+    }
+
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 1.8rem;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      background: #f8fafc;
+      transition: all 0.25s;
+      cursor: pointer;
+      margin-bottom: 2rem;
+      position: relative;
+      background: #f9fafc;
+    }
+
+    .upload-area:hover {
+      border-color: #3b82f6;
+      background: #f0f4ff;
+      box-shadow: 0 8px 20px rgba(59,130,246,0.08);
+    }
+
+    .upload-area.dragover {
+      border-color: #2563eb;
+      background: #eef2ff;
+      transform: scale(1.01);
+    }
+
+    .upload-icon {
+      font-size: 2.8rem;
+      margin-bottom: 0.5rem;
+      color: #3b82f6;
+    }
+
+    .upload-text {
+      font-weight: 500;
+      color: #1e293b;
+      font-size: 1.1rem;
+    }
+
+    .upload-hint {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 0.4rem;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .preview-section {
+      margin: 1.8rem 0 1.5rem;
+      background: #f1f5f9;
+      border-radius: 1.5rem;
+      padding: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+      transition: 0.2s;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -8px rgba(0,0,0,0.1);
+      object-fit: contain;
+      background: #fff;
+      display: block;
+    }
+
+    .placeholder-text {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .dimension-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0 1.2rem;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 2.5rem;
+      padding: 0.2rem 0.2rem 0.2rem 1.2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+      flex: 1 1 140px;
+      background: #ffffff;
+    }
+
+    .input-group label {
+      font-weight: 500;
+      color: #334155;
+      margin-right: 0.4rem;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .input-group input {
+      border: none;
+      padding: 0.7rem 0.5rem;
+      font-size: 1rem;
+      width: 100%;
+      background: transparent;
+      outline: none;
+      font-weight: 500;
+      color: #0f172a;
+    }
+
+    .input-group span {
+      color: #64748b;
+      padding-right: 0.8rem;
+      font-size: 0.9rem;
+    }
+
+    .lock-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 2rem;
+      padding: 0.65rem 1.1rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      background: #f1f5f9;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1e293b;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+      white-space: nowrap;
+    }
+
+    .lock-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    .lock-btn.active {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.8rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 2.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      background: white;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+      flex: 1 1 auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+
+    .btn-primary {
+      background: #0f172a;
+      color: white;
+      border: 1px solid #0f172a;
+      box-shadow: 0 10px 18px -8px rgba(15,23,42,0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1e293b;
+    }
+
+    .btn-outline {
+      background: white;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.2);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #475569;
+      margin-top: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .original-size {
+      background: #e9eef3;
+      padding: 0.3rem 1rem;
+      border-radius: 2rem;
+      font-weight: 500;
+    }
+
+    .error-message {
+      color: #b91c1c;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 1.8rem 1.2rem;
+      }
+      .dimension-panel {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .lock-btn {
+        align-self: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>
+      <span>🖼️</span> 图片尺寸调整
+    </h1>
+    <div class="subtitle">思绪思维导图 · 简洁工具</div>
+
+    <!-- 上传区域 -->
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📂</div>
+      <div class="upload-text">点击或拖拽图片到此处</div>
+      <div class="upload-hint">支持 JPG, PNG, WEBP, BMP</div>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <!-- 预览区域 -->
+    <div class="preview-section" id="previewContainer">
+      <span class="placeholder-text" id="placeholderText">尚未选择图片</span>
+      <img id="previewImage" class="preview-img" src="#" alt="预览图片" style="display: none;">
+    </div>
+
+    <!-- 尺寸输入 -->
+    <div class="dimension-panel">
+      <div class="input-group">
+        <label>宽</label>
+        <input type="number" id="widthInput" placeholder="宽度" value="800" min="1" step="1">
+        <span>px</span>
+      </div>
+      <div class="input-group">
+        <label>高</label>
+        <input type="number" id="heightInput" placeholder="高度" value="600" min="1" step="1">
+        <span>px</span>
+      </div>
+      <button class="lock-btn" id="lockRatioBtn" title="锁定/解锁宽高比例">🔓</button>
+    </div>
+
+    <div class="info-row">
+      <span class="original-size" id="originalSizeLabel">原始尺寸：—</span>
+      <span id="ratioHint" style="font-weight:500;"></span>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <div class="actions">
+      <button class="btn btn-outline" id="resetBtn" disabled>↺ 重置</button>
+      <button class="btn btn-primary" id="downloadBtn" disabled>⬇️ 下载调整后的图片</button>
+    </div>
+    <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.8rem; text-align:center;">
+      调整尺寸后点击下载，图片格式保持与原图一致
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // DOM 元素
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const previewImage = document.getElementById('previewImage');
+      const placeholderText = document.getElementById('placeholderText');
+      const widthInput = document.getElementById('widthInput');
+      const heightInput = document.getElementById('heightInput');
+      const lockRatioBtn = document.getElementById('lockRatioBtn');
+      const originalSizeLabel = document.getElementById('originalSizeLabel');
+      const ratioHint = document.getElementById('ratioHint');
+      const errorMessage = document.getElementById('errorMessage');
+      const resetBtn = document.getElementById('resetBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+
+      // 状态变量
+      let originalImage = null;           // 原始图片HTMLImageElement
+      let originalWidth = 0;
+      let originalHeight = 0;
+      let aspectRatio = 1.0;            // 宽/高
+      let lockAspectRatio = false;      // 是否锁定比例
+      let currentFile = null;           // 原始文件对象
+
+      // ---------- 工具函数 ----------
+      function clearError() {
+        errorMessage.textContent = '';
+      }
+
+      function showError(msg) {
+        errorMessage.textContent = msg || '发生未知错误';
+      }
+
+      // 更新原始尺寸显示
+      function updateOriginalSizeLabel(w, h) {
+        if (w && h) {
+          originalSizeLabel.textContent = `原始尺寸：${w} × ${h} px`;
+        } else {
+          originalSizeLabel.textContent = '原始尺寸：—';
+        }
+      }
+
+      // 根据锁定状态更新宽高输入框 (由宽度触发高度或反之)
+      function syncDimensionFromWidth() {
+        if (!lockAspectRatio) return;
+        if (!originalWidth || !originalHeight) return;
+        const w = parseFloat(widthInput.value);
+        if (isNaN(w) || w <= 0) return;
+        const newHeight = Math.round(w / aspectRatio);
+        heightInput.value = newHeight > 0 ? newHeight : 1;
+      }
+
+      function syncDimensionFromHeight() {
+        if (!lockAspectRatio) return;
+        if (!originalWidth || !originalHeight) return;
+        const h = parseFloat(heightInput.value);
+        if (isNaN(h) || h <= 0) return;
+        const newWidth = Math.round(h * aspectRatio);
+        widthInput.value = newWidth > 0 ? newWidth : 1;
+      }
+
+      // 更新比例提示
+      function updateRatioHint() {
+        if (originalWidth && originalHeight) {
+          const ratioVal = (originalWidth / originalHeight).toFixed(3);
+          ratioHint.textContent = `原始比例 ${ratioVal} (宽/高)`;
+        } else {
+          ratioHint.textContent = '';
+        }
+      }
+
+      // 重置输入框为原始尺寸
+      function resetToOriginalDimensions() {
+        if (originalWidth && originalHeight) {
+          widthInput.value = originalWidth;
+          heightInput.value = originalHeight;
+        } else {
+          widthInput.value = 800;
+          heightInput.value = 600;
+        }
+        clearError();
+      }
+
+      // 启用/禁用操作按钮
+      function updateButtonsState() {
+        const hasImage = originalImage !== null && currentFile !== null;
+        resetBtn.disabled = !hasImage;
+        downloadBtn.disabled = !hasImage;
+      }
+
+      // 清理预览与状态
+      function resetAllState() {
+        // 清除图片对象
+        originalImage = null;
+        currentFile = null;
+        originalWidth = 0;
+        originalHeight = 0;
+        aspectRatio = 1.0;
+        
+        previewImage.style.display = 'none';
+        previewImage.src = '#';
+        placeholderText.style.display = 'block';
+        
+        widthInput.value = 800;
+        heightInput.value = 600;
+        
+        updateOriginalSizeLabel(0, 0);
+        updateRatioHint();
+        clearError();
+        updateButtonsState();
+        
+        // 重置锁定状态为解锁（可选，保持用户偏好？这里重置为解锁更安全）
+        setLockState(false);
+        
+        // 清空文件input，以便重新选择同一文件仍触发change
+        fileInput.value = '';
+      }
+
+      // 设置锁定状态UI
+      function setLockState(locked) {
+        lockAspectRatio = locked;
+        if (locked) {
+          lockRatioBtn.textContent = '🔒';
+          lockRatioBtn.classList.add('active');
+        } else {
+          lockRatioBtn.textContent = '🔓';
+          lockRatioBtn.classList.remove('active');
+        }
+      }
+
+      // 加载图片文件
+      function loadImageFromFile(file) {
+        if (!file) return;
+        
+        // 验证文件类型
+        if (!file.type.startsWith('image/')) {
+          showError('请选择有效的图片文件。');
+          return;
+        }
+
+        clearError();
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            // 保存原始信息
+            originalImage = img;
+            originalWidth = img.naturalWidth;
+            originalHeight = img.naturalHeight;
+            aspectRatio = originalWidth / originalHeight;
+            currentFile = file;
+            
+            // 更新预览
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+            placeholderText.style.display = 'none';
+            
+            // 设置输入框为原始尺寸
+            widthInput.value = originalWidth;
+            heightInput.value = originalHeight;
+            
+            updateOriginalSizeLabel(originalWidth, originalHeight);
+            updateRatioHint();
+            updateButtonsState();
+            
+            // 如果当前是锁定状态，无需额外同步（因为刚设置为原始值）
+            // 但为了安全，若锁定状态开启，确保比例一致（已经是原始值）
+            if (lockAspectRatio) {
+              // 微调确保完全符合比例（可能因取整偏差）
+              const calcHeight = Math.round(originalWidth / aspectRatio);
+              if (calcHeight !== originalHeight) {
+                heightInput.value = calcHeight;
+              }
+            }
+            
+            clearError();
+          };
+          
+          img.onerror = () => {
+            showError('图片加载失败，请尝试其他图片。');
+            resetAllState();
+          };
+          
+          img.src = e.target.result;
+        };
+        
+        reader.onerror = () => {
+          showError('文件读取错误。');
+          resetAllState();
+        };
+        
+        reader.readAsDataURL(file);
+      }
+
+      // 处理文件选择
+      function handleFileSelect(file) {
+        if (file) {
+          loadImageFromFile(file);
+        }
+      }
+
+      // ---------- 事件绑定 ----------
+      // 点击上传区域
+      uploadArea.addEventListener('click', (e) => {
+        // 防止点击内部按钮等误触
+        fileInput.click();
+      });
+
+      // 文件选择变化
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleFileSelect(file);
+        }
+      });
+
+      // 拖拽事件
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          if (file && file.type.startsWith('image/')) {
+            handleFileSelect(file);
+          } else {
+            showError('请拖入图片文件。');
+          }
+        }
+      });
+
+      // 宽度输入监听
+      widthInput.addEventListener('input', () => {
+        clearError();
+        if (lockAspectRatio && originalWidth && originalHeight) {
+          syncDimensionFromWidth();
+        }
+        // 简单验证正数
+        const w = parseFloat(widthInput.value);
+        if (isNaN(w) || w <= 0) {
+          // 不强制清空，但可提示
+        }
+      });
+
+      // 高度输入监听
+      heightInput.addEventListener('input', () => {
+        clearError();
+        if (lockAspectRatio && originalWidth && originalHeight) {
+          syncDimensionFromHeight();
+        }
+        const h = parseFloat(heightInput.value);
+        if (isNaN(h) || h <= 0) {
+          // 忽略
+        }
+      });
+
+      // 锁定按钮
+      lockRatioBtn.addEventListener('click', () => {
+        if (!originalImage) {
+          showError('请先选择图片才能锁定比例。');
+          return;
+        }
+        
+        const newLockState = !lockAspectRatio;
+        setLockState(newLockState);
+        
+        if (newLockState) {
+          // 刚启用锁定时，根据当前宽度调整高度，使比例与原始一致
+          const currentWidth = parseFloat(widthInput.value);
+          if (!isNaN(currentWidth) && currentWidth > 0 && originalWidth && originalHeight) {
+            const newHeight = Math.round(currentWidth / aspectRatio);
+            heightInput.value = newHeight > 0 ? newHeight : 1;
+          } else {
+            // 如果宽度无效，重置为原始尺寸
+            resetToOriginalDimensions();
+          }
+          clearError();
+        }
+        // 解锁时不做额外操作
+      });
+
+      // 重置按钮
+      resetBtn.addEventListener('click', () => {
+        if (originalImage) {
+          resetToOriginalDimensions();
+          clearError();
+        } else {
+          resetAllState();
+        }
+      });
+
+      // 下载按钮：核心功能
+      downloadBtn.addEventListener('click', () => {
+        if (!originalImage || !currentFile) {
+          showError('没有可用的图片，请先上传。');
+          return;
+        }
+
+        const targetWidth = parseFloat(widthInput.value);
+        const targetHeight = parseFloat(heightInput.value);
+
+        if (isNaN(targetWidth) || targetWidth <= 0 || isNaN(targetHeight) || targetHeight <= 0) {
+          showError('请输入有效的宽度和高度（正整数）。');
+          return;
+        }
+
+        // 限制尺寸避免过大导致性能问题（可选，但保留灵活性）
+        if (targetWidth > 8000 || targetHeight > 8000) {
+          showError('尺寸过大，请设置宽度和高度不超过8000像素。');
+          return;
+        }
+
+        clearError();
+
+        try {
+          // 创建Canvas进行尺寸调整
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          
+          // 绘制图片并缩放
+          ctx.drawImage(originalImage, 0, 0, targetWidth, targetHeight);
+          
+          // 获取原文件扩展名以决定输出格式
+          let mimeType = currentFile.type || 'image/png';
+          // 对于某些浏览器可能不支持的类型，回退到png
+          const supportedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/bmp'];
+          if (!supportedTypes.includes(mimeType)) {
+            mimeType = 'image/png';
+          }
+          
+          // 从canvas获取blob
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              showError('生成图片失败，请重试。');
+              return;
+            }
+            
+            // 生成下载链接
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const originalName = currentFile.name || 'image';
+            const dotIndex = originalName.lastIndexOf('.');
+            const baseName = dotIndex > 0 ? originalName.substring(0, dotIndex) : originalName;
+            // 保留原扩展名或根据mime调整
+            let extension = '.png';
+            if (mimeType === 'image/jpeg') extension = '.jpg';
+            else if (mimeType === 'image/webp') extension = '.webp';
+            else if (mimeType === 'image/bmp') extension = '.bmp';
+            else if (mimeType === 'image/png') extension = '.png';
+            
+            const fileName = `${baseName}_resized_${targetWidth}x${targetHeight}${extension}`;
+            
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            // 可选提示（不显示错误）
+          }, mimeType, 0.92); // 质量参数对jpeg/webp有效
+          
+        } catch (err) {
+          console.error(err);
+          showError('处理图片时出错，请重试。');
+        }
+      });
+
+      // 额外：如果用户手动修改尺寸且锁定开启，通过失去焦点时微调保证比例（可选）
+      widthInput.addEventListener('blur', () => {
+        if (lockAspectRatio && originalWidth && originalHeight) {
+          const w = parseFloat(widthInput.value);
+          if (!isNaN(w) && w > 0) {
+            const h = Math.round(w / aspectRatio);
+            if (h > 0) heightInput.value = h;
+          }
+        }
+      });
+
+      heightInput.addEventListener('blur', () => {
+        if (lockAspectRatio && originalWidth && originalHeight) {
+          const h = parseFloat(heightInput.value);
+          if (!isNaN(h) && h > 0) {
+            const w = Math.round(h * aspectRatio);
+            if (w > 0) widthInput.value = w;
+          }
+        }
+      });
+
+      // 初始化状态
+      setLockState(false);
+      updateButtonsState();
+      updateOriginalSizeLabel(0,0);
+      updateRatioHint();
+    })();
+  </script>
+</body>
+</html>
