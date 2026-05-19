@@ -2,6 +2,10 @@
 
 本仓库所有小工具均使用AI生成。
 
-- [图片尺寸调整工具](https://wanglin2.github.io/ai-tools/image-resizer.html)
+- 图片尺寸调整
+
+- 文本差异对比
+
+- JSON格式化
 
 持续收录中。。。
